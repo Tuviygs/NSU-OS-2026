@@ -89,7 +89,7 @@ int main(int argc, char** argv) {
 
 
     write(1, "Enter the line number for which you want to get information or \"0\" to exit.\n",
-         sizeof("Enter the line number for which you want to get information or \"0\" to exit.\n")) - 1;
+         sizeof("Enter the line number for which you want to get information or \"0\" to exit.\n") - 1);
 
     char inputBuf[BUFSIZ];
     int lineNum;
@@ -103,7 +103,7 @@ int main(int argc, char** argv) {
         if (endPtr == inputBuf || (*endPtr) != '\n') {
             write(2, "Incorrect input. Try again\n", sizeof("Incorrect input. Try again\n"));
             write(1, "Enter the line number for which you want to get information or \"0\" to exit.\n",
-                sizeof("Enter the line number for which you want to get information or \"0\" to exit.\n")) - 1;
+                sizeof("Enter the line number for which you want to get information or \"0\" to exit.\n") - 1) ;
             continue;
         }
 
