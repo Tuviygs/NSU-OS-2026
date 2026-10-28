@@ -12,7 +12,8 @@ int main() {
     ssize_t bytesread = read(0, buf, BUFSIZ);
 
     if (strchr(buf, '/') != NULL) {
-        write(1, "Введён некорректный шаблон.\n", strlen("Введён некорректный шаблон.\n")):
+        write(1, "Введён некорректный шаблон.\n", strlen("Введён некорректный шаблон.\n"));
+        return;
     }
 
     if (buf[bytesread - 1] == '\n') {
