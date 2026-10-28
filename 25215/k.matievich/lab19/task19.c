@@ -10,7 +10,11 @@ int main() {
     write(1, "Введите шаблон имени файла:\n", strlen("Введите шаблон имени файла:\n"));
     char buf[BUFSIZ];
     ssize_t bytesread = read(0, buf, BUFSIZ);
-    
+
+    if (strchr(buf, '/') != NULL) {
+        write(1, "Введён некорректный шаблон.\n", strlen("Введён некорректный шаблон.\n")):
+    }
+
     if (buf[bytesread - 1] == '\n') {
         buf[bytesread - 1] = '\0';
     } else {
