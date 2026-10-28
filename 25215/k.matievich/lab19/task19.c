@@ -13,7 +13,7 @@ int main() {
 
     if (strchr(buf, '/') != NULL) {
         write(1, "Введён некорректный шаблон.\n", strlen("Введён некорректный шаблон.\n"));
-        return;
+        return 0;
     }
 
     if (buf[bytesread - 1] == '\n') {
