@@ -4,6 +4,7 @@
 #include <dirent.h>
 #include <fnmatch.h>
 #include <limits.h>
+#include <sys/stat.h>
 
 
 void fsearch(int* cnt, const char* pat, char* curpath, char* curdir) {
@@ -34,11 +35,12 @@ void fsearch(int* cnt, const char* pat, char* curpath, char* curdir) {
             (*cnt)++;
         }
 
+        struct stat st;
+        char ncurdir[PATH_MAX];
+        snprintf(ncurdir, sizeof(ncurdir), "%s/%s", curdir, curfile->d_name);
 
-        if (curfile->d_type == DT_DIR) {
-            char ncurdir[PATH_MAX];
-            snprintf(ncurdir, sizeof(ncurdir), "%s/%s", curdir, curfile->d_name);
-
+        stat(ncurdir, &st);
+        if (S_ISDIR(st.st_mode)) {
             fsearch(cnt, pat, ncurpath, ncurdir);
         }
 
