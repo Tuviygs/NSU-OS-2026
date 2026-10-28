@@ -28,12 +28,17 @@ int main() {
 
         if (fnmatch(buf, curfile->d_name, 0) == 0) {
             write(1, curfile->d_name, strlen(curfile->d_name));
-            write(1, "\n", 2);
+            write(1, "\n", 1);
             cnt++;
         }
         curfile = readdir(dir);
     }
     closedir(dir);
+
+    if (cnt == 0) {
+        write(1, buf, strlen(buf));
+        write(1, "\n", 1);
+    }
     
     return 0;
 }
