@@ -17,7 +17,7 @@ int main() {
 
         int stat;
         wait(&stat);
-        printf("\nВыполнен cat файла /usr/include/unistd.h");
+        printf("\nВыполнен cat файла /usr/include/unistd.h\n");
     }
 
     return 0;
