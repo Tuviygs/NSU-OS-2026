@@ -21,7 +21,7 @@ int main(int argc, char* argv[]) {
     if (pid == 0) {
 
         if (execvp(argv[1], args) == -1) {
-            exit(2);
+            exit(4);
         }
 
     } else {
