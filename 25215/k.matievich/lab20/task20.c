@@ -58,6 +58,11 @@ int main() {
     char buf[BUFSIZ];
     ssize_t bytesread = read(0, buf, BUFSIZ);
     
+    if (bytesread < 1) {
+        write(2, "Не удалось получить шаблон\n", strlen("Не удалось получить шаблон\n"));
+        return 1;
+    }
+
     if (buf[bytesread - 1] == '\n') {
         buf[bytesread - 1] = '\0';
     } else {
