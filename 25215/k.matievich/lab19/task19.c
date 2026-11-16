@@ -11,6 +11,11 @@ int main() {
     char buf[BUFSIZ];
     ssize_t bytesread = read(0, buf, BUFSIZ);
 
+    if (bytesread < 1) {
+        write(2, "Не удалось получить шаблон\n", strlen("Не удалось получить шаблон\n"));
+        return 1;
+    }
+
     if (strchr(buf, '/') != NULL) {
         write(1, "Введён некорректный шаблон.\n", strlen("Введён некорректный шаблон.\n"));
         return 0;
