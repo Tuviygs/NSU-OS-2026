@@ -9,6 +9,10 @@
 #include <libgen.h>
 #include <time.h> 
 
+#define PERMS_BUF_LEN 10 
+#define SIZE_AND_TIME_BUF_LEN  32 
+#define NAME_BUF_LEN (NAME_MAX + 1)
+
 typedef struct myfileinfo {
     char* perms;
     char* ownername;
@@ -24,12 +28,12 @@ typedef struct myfileinfo {
 myfileinfo* getinfo(struct stat st, char* filepath) {
 
     myfileinfo* finfo = (myfileinfo*)malloc(sizeof(myfileinfo));
-    finfo->perms = (char*)malloc(10*sizeof(char));
-    finfo->groupname = (char*)malloc(256*sizeof(char));
-    finfo->ownername = (char*)malloc(256*sizeof(char));
-    finfo->filename = (char*)malloc(256*sizeof(char));
-    finfo->modtime = (char*)malloc(32*sizeof(char));
-    finfo->size = (char*)malloc(32*sizeof(char));
+    finfo->perms = (char*)malloc(PERMS_BUF_LEN*sizeof(char));
+    finfo->groupname = (char*)malloc(NAME_BUF_LEN*sizeof(char));
+    finfo->ownername = (char*)malloc(NAME_BUF_LEN*sizeof(char));
+    finfo->filename = (char*)malloc(NAME_BUF_LEN*sizeof(char));
+    finfo->modtime = (char*)malloc(SIZE_AND_TIME_BUF_LEN*sizeof(char));
+    finfo->size = (char*)malloc(SIZE_AND_TIME_BUF_LEN*sizeof(char));
 
     finfo->type = '?';
     if (S_ISREG(st.st_mode)) {
@@ -55,23 +59,23 @@ myfileinfo* getinfo(struct stat st, char* filepath) {
 
     struct passwd* pw = getpwuid(st.st_uid);
     if (pw) {
-        strncpy(finfo->ownername, pw->pw_name, 255);
+        snprintf(finfo->ownername, NAME_BUF_LEN, "%s", pw->pw_name);
     } else {
-        snprintf(finfo->ownername, 256, "%d", st.st_uid);
+        snprintf(finfo->ownername, NAME_BUF_LEN, "%d", st.st_uid);
     }
     struct group* gr = getgrgid(st.st_gid);
     if (gr) {
-        strncpy(finfo->groupname, gr->gr_name, 255);
+        snprintf(finfo->groupname, NAME_BUF_LEN, "%s", gr->gr_name);
     } else {
-        snprintf(finfo->groupname, 256, "%d", st.st_gid);
+        snprintf(finfo->groupname, NAME_BUF_LEN, "%d", st.st_gid);
     }
 
     char* path_copy = strdup(filepath);
     char* bname = basename(path_copy);
-    strncpy(finfo->filename, bname, 255);
+    snprintf(finfo->filename, NAME_MAX + 1, "%s", bname);
     free(path_copy);
 
-    char size[32] = "";
+    char size[SIZE_AND_TIME_BUF_LEN] = "";
     if (finfo->type == '-') {
         snprintf(size, sizeof(size), "%lu", (unsigned long)st.st_size);
     }
@@ -82,7 +86,7 @@ myfileinfo* getinfo(struct stat st, char* filepath) {
     struct tm *sp;
     time_t modtime = st.st_mtime;
     sp = localtime(&modtime);
-    snprintf(finfo->modtime, 32, "%02d/%02d/%02d", sp->tm_mday, sp->tm_mon + 1, sp->tm_year + 1900);
+    snprintf(finfo->modtime, SIZE_AND_TIME_BUF_LEN, "%02d/%02d/%02d", sp->tm_mday, sp->tm_mon + 1, sp->tm_year + 1900);
 
     return finfo;
 }
@@ -112,13 +116,13 @@ int main(int argc, char *argv[]) {
     int cnt = 0;
     int maxuname = 0;
     int maxgname = 0;
-    int maxsize = 0;
+    int maxsize = 0;    
 
     myfileinfo** finfos = (myfileinfo**)malloc((argc-1)*sizeof(myfileinfo*));
     for (int i = 1; i < argc; i++) {
         struct stat st;
         if (lstat(argv[i], &st) == -1) {
-            write(2, "task18: cannot accsess '", strlen("task18: cannot accsess '"));
+            write(2, "task18: cannot access '", strlen("task18: cannot access '"));
             write(2, argv[i], strlen(argv[i]));
             write(2, "': No such file or directory\n", strlen("': No such file or directory\n"));
         } else {
