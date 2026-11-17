@@ -4,6 +4,7 @@
 #include <unistd.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 
 
 typedef struct stroke {
@@ -23,7 +24,7 @@ int main(int argc, char** argv) {
 
     if (argc != 2) {
         write(2, "Unknown command. Correct use is: \"./task5 <file_name>\n",
-            sizeof("Unknown command. Correct use is: \"./task5 <file_name>\n"));
+            strlen("Unknown command. Correct use is: \"./task5 <file_name>\n"));
         return 1;
     }
 
@@ -36,7 +37,7 @@ int main(int argc, char** argv) {
     int fildes = open(fileName, O_RDONLY);
 
     if (fildes == -1) {
-        write(2, "There's no such file in this directory\n", sizeof("There's no such file in this directory\n"));
+        write(2, "There's no such file in this directory\n", strlen("There's no such file in this directory\n"));
         free(table->table);
         free(table);
         return 2;
@@ -52,6 +53,13 @@ int main(int argc, char** argv) {
 
     bytesRead = read(fildes, buf, BUFSIZ - 1);
 
+    if (bytesRead == -1) {
+        write(2, "Не удалость прочитать файл\n", strlen("Не удалость прочитать файл\n"));
+        free(table->table);
+        free(table);
+        close(fildes);
+        return 1;
+    }
 
 
     while (bytesRead > 0) {
@@ -75,6 +83,13 @@ int main(int argc, char** argv) {
         }
 
         bytesRead = read(fildes, buf, BUFSIZ - 1);
+        if (bytesRead == -1) {
+            write(2, "Не удалость прочитать файл\n", strlen("Не удалость прочитать файл\n"));
+            free(table->table);
+            free(table);
+            close(fildes);
+        return 1;
+    }
     }
 
     if (curSize != 0) {
@@ -90,34 +105,37 @@ int main(int argc, char** argv) {
 
 
     write(1, "Enter the line number for which you want to get information or \"0\" to exit.\n",
-         sizeof("Enter the line number for which you want to get information or \"0\" to exit.\n"));
+         strlen("Enter the line number for which you want to get information or \"0\" to exit.\n"));
 
     char inputBuf[BUFSIZ];
     long long lineNum;
     
-    while ((lineNum = read(0, inputBuf ,BUFSIZ)) > 0) {
+    while ((bytesRead = read(0, inputBuf ,BUFSIZ - 1)) > 0) {
+
+
+        inputBuf[bytesRead] = '\0';
 
         char* endPtr;
 
         lineNum = strtoll(inputBuf, &endPtr, 10);
 
-        if (endPtr == inputBuf || (*endPtr) != '\n') {
-            write(2, "Incorrect input. Try again\n", sizeof("Incorrect input. Try again\n"));
+        if (endPtr == inputBuf || (*endPtr != '\n' && *endPtr != '\0')) {
+            write(2, "Incorrect input. Try again\n", strlen("Incorrect input. Try again\n"));
             write(1, "Enter the line number for which you want to get information or \"0\" to exit.\n",
-                 sizeof("Enter the line number for which you want to get information or \"0\" to exit.\n"));
+                 strlen("Enter the line number for which you want to get information or \"0\" to exit.\n"));
             continue;
         }
 
 
         if (lineNum == 0) {
-            write(1, "Exiting the programm\n", sizeof("Exiting the programm\n"));
+            write(1, "Exiting the programm\n", strlen("Exiting the programm\n"));
             break;
         }
 
         if (lineNum < 0 || lineNum > (long long)table->size) {
-            write(2, "There's no such line in this file. Try again\n", sizeof("There's no such line in this file. Try again\n"));
+            write(2, "There's no such line in this file. Try again\n", strlen("There's no such line in this file. Try again\n"));
             write(1, "Enter the line number for which you want to get information or \"0\" to exit.\n",
-                 sizeof("Enter the line number for which you want to get information or \"0\" to exit.\n"));
+                 strlen("Enter the line number for which you want to get information or \"0\" to exit.\n"));
             continue;
         }
 
@@ -125,17 +143,26 @@ int main(int argc, char** argv) {
         off_t newOffset = table->table[lineNum-1].position;
         size_t lineSize = table->table[lineNum-1].len;
         lseek(fildes, newOffset, SEEK_SET);
-        char newBuf[lineSize + 3];
+        char* newBuf = (char*)malloc((lineSize + 3)*sizeof(char));
 
-        size_t newBytesRead = read(fildes, newBuf, lineSize);
+        ssize_t newBytesRead = read(fildes, newBuf, lineSize);
+
+        if (newBytesRead < 0) {
+            write(2, "Ошибка вывода строки\n", strlen("Ошибка вывода строки\n"));
+            free(newBuf);
+            break;
+        }
+
         newBuf[newBytesRead] = '\0';
         printf("%s\n", newBuf);
 
+        free(newBuf);
+
         write(1, "Enter the line number for which you want to get information or \"0\" to exit.\n",
-          sizeof("Enter the line number for which you want to get information or \"0\" to exit.\n"));
+          strlen("Enter the line number for which you want to get information or \"0\" to exit.\n"));
     }
 
-    free(table->table);
+    free(table->table); 
     free(table);
     close(fildes);
     return 0;
